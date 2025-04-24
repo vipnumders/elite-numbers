@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Numbers - NumberElite</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Clerk Authentication -->
+    <script src="https://cdn.clerk.dev/clerk.js"></script>
+    <script>
+        // Initialize Clerk with your publishable key
+        // Get your API key from dashboard.clerk.com
+        window.Clerk = window.Clerk || {};
+        window.Clerk.publishableKey = 'pk_test_••••••••••••••••••••••••••••••••••';
+    </script>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo-nav">
+                <div class="logo">NumberElite</div>
+                <div class="user-auth">
+                    <div id="user-button"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="premium-hero">
+        <div class="container">
+            <h1>Premium VIP Numbers</h1>
+            <p>Exclusive collection of premium numbers</p>
+        </div>
+    </section>
+
+    <section class="premium-content hidden">
+        <div class="container">
+            <h2>Exclusive Premium Numbers</h2>
+            <p>As a valued member, you have access to our premium collection of VIP numbers.</p>
+            
+            <div class="premium-numbers">
+                <div class="number-card premium">
+                    <div class="type-badge postpaid">POSTPAID</div>
+                    <div class="price">₹ 25000</div>
+                    <div class="number premium-number"><span class="highlight">9823</span> 000000</div>
+                    <div class="details">
+                        <div class="sum-total">Sum total: 9</div>
+                        <div class="premium-badge">Premium</div>
+                    </div>
+                    <div class="buttons">
+                        <button class="book-now">Book Now</button>
+                        <button class="add-to-cart" data-number="9823000000" data-type="POSTPAID" data-price="25000">ADD TO CART</button>
+                    </div>
+                </div>
+                
+                <div class="number-card premium">
+                    <div class="type-badge postpaid">POSTPAID</div>
+                    <div class="price">₹ 30000</div>
+                    <div class="number premium-number"><span class="highlight">9823</span> 111111</div>
+                    <div class="details">
+                        <div class="sum-total">Sum total: 6</div>
+                        <div class="premium-badge">Premium</div>
+                    </div>
+                    <div class="buttons">
+                        <button class="book-now">Book Now</button>
+                        <button class="add-to-cart" data-number="9823111111" data-type="POSTPAID" data-price="30000">ADD TO CART</button>
+                    </div>
+                </div>
+                
+                <div class="number-card premium">
+                    <div class="type-badge postpaid">POSTPAID</div>
+                    <div class="price">₹ 35000</div>
+                    <div class="number premium-number"><span class="highlight">9823</span> 777777</div>
+                    <div class="details">
+                        <div class="sum-total">Sum total: 3</div>
+                        <div class="premium-badge">Premium</div>
+                    </div>
+                    <div class="buttons">
+                        <button class="book-now">Book Now</button>
+                        <button class="add-to-cart" data-number="9823777777" data-type="POSTPAID" data-price="35000">ADD TO CART</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="loginBanner" class="login-banner">
+        <div class="container">
+            <div class="protected-content-banner">
+                <div class="protected-content-icon">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <div class="protected-content-text">
+                    <h4>Premium Content</h4>
+                    <p>Sign in to access our exclusive premium numbers and VIP features.</p>
+                </div>
+                <button class="signin-btn" id="signinBtn">Sign In</button>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-cols">
+                <div class="footer-col">
+                    <h3>QUICK LINKS</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="premium.html">Premium Numbers</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>SUPPORT</h3>
+                    <ul>
+                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="#">FAQ'S</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                &copy; NumberElite.com. All Rights Reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Load JavaScript files -->
+    <script src="auth.js"></script>
+    <script src="script.js"></script>
+    <script>
+        // Additional premium page functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show/hide premium content based on auth state
+            function updateContent() {
+                const premiumContent = document.querySelector('.premium-content');
+                const loginBanner = document.getElementById('loginBanner');
+                
+                if (window.Clerk && window.Clerk.user) {
+                    // User is logged in - show premium content
+                    premiumContent.classList.remove('hidden');
+                    loginBanner.style.display = 'none';
+                    
+                    // Set up cart functionality for premium numbers
+                    setupPremiumButtons();
+                } else {
+                    // User is not logged in - hide premium content
+                    premiumContent.classList.add('hidden');
+                    loginBanner.style.display = 'block';
+                }
+            }
+            
+            // Set up cart functionality for premium numbers
+            function setupPremiumButtons() {
+                const addToCartButtons = document.querySelectorAll('.premium-numbers .add-to-cart');
+                addToCartButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        if (typeof addToCart === 'function') {
+                            addToCart(
+                                this.getAttribute('data-number'),
+                                this.getAttribute('data-type'),
+                                this.getAttribute('data-price')
+                            );
+                        }
+                    });
+                });
+                
+                const bookNowButtons = document.querySelectorAll('.premium-numbers .book-now');
+                bookNowButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const cartBtn = this.parentNode.querySelector('.add-to-cart');
+                        
+                        // Clear cart and add just this number
+                        if (typeof cartItems !== 'undefined') {
+                            cartItems = [];
+                        }
+                        
+                        if (typeof addToCart === 'function') {
+                            addToCart(
+                                cartBtn.getAttribute('data-number'),
+                                cartBtn.getAttribute('data-type'),
+                                cartBtn.getAttribute('data-price')
+                            );
+                        }
+                        
+                        // Show cart if function exists
+                        if (typeof toggleCart === 'function') {
+                            toggleCart();
+                        }
+                    });
+                });
+            }
+            
+            // Set up sign in button
+            const signinBtn = document.getElementById('signinBtn');
+            if (signinBtn) {
+                signinBtn.addEventListener('click', function() {
+                    if (window.Clerk) {
+                        window.Clerk.openSignIn();
+                    }
+                });
+            }
+            
+            // Check auth state on load
+            updateContent();
+            
+            // Listen for auth state changes
+            if (window.Clerk) {
+                window.Clerk.addListener(({ user }) => {
+                    updateContent();
+                });
+            }
+        });
+    </script>
+</body>
+</html> 

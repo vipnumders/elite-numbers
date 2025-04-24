@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout Process Test</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .cart-total {
+            margin-top: 20px;
+            text-align: right;
+            font-weight: bold;
+        }
+        .checkout-btn {
+            display: block;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 20px auto;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .checkout-form {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .checkout-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .checkout-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .close-checkout {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input, 
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .payment-method {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .payment-method:hover {
+            border-color: #4CAF50;
+        }
+        .payment-method.selected {
+            border-color: #4CAF50;
+            background: #e8f5e9;
+        }
+        .payment-method img {
+            height: 40px;
+            width: auto;
+            object-fit: contain;
+            margin-bottom: 8px;
+        }
+        .pay-now-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            width: 100%;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 4px;
+            background: #333;
+            color: white;
+            z-index: 1001;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .notification.show {
+            opacity: 1;
+        }
+        .notification.success {
+            background: #4CAF50;
+        }
+        .notification.error {
+            background: #f44336;
+        }
+        .notification.warning {
+            background: #ff9800;
+        }
+        .payment-processing {
+            text-align: center;
+            padding: 20px;
+        }
+        .payment-processing i {
+            font-size: 40px;
+            color: #4CAF50;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Checkout Test Page</h1>
+        
+        <div class="cart">
+            <div class="cart-item">
+                <div class="item-details">
+                    <strong>9823659659</strong>
+                    <div>Type: POSTPAID</div>
+                </div>
+                <div class="item-price">₹10620</div>
+            </div>
+            <div class="cart-item">
+                <div class="item-details">
+                    <strong>9823685685</strong>
+                    <div>Type: POSTPAID</div>
+                </div>
+                <div class="item-price">₹10620</div>
+            </div>
+            <div class="cart-total">
+                <div>Subtotal: ₹21240</div>
+                <div>GST (12%): ₹2548.80</div>
+                <div>Total: ₹23788.80</div>
+            </div>
+        </div>
+        
+        <button id="checkoutBtn" class="checkout-btn">Proceed to Checkout</button>
+    </div>
+
+    <script>
+        // Simple cart simulation
+        const cart = [
+            { number: '9823659659', type: 'POSTPAID', price: 10620 },
+            { number: '9823685685', type: 'POSTPAID', price: 10620 }
+        ];
+
+        function calculateTotal() {
+            const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
+            const gst = subtotal * 0.12;
+            const total = subtotal + gst;
+            return { subtotal, gst, total };
+        }
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type || ''}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            // Trigger reflow to allow transition to work
+            notification.offsetHeight;
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        function showCheckoutForm() {
+            console.log('Showing checkout form');
+            
+            const { subtotal, gst, total } = calculateTotal();
+            const checkoutForm = document.createElement('div');
+            checkoutForm.className = 'checkout-form';
+            checkoutForm.innerHTML = `
+                <div class="checkout-content">
+                    <div class="checkout-header">
+                        <h3>Checkout</h3>
+                        <button class="close-checkout" onclick="closeCheckoutForm()">&times;</button>
+                    </div>
+                    <div class="order-summary">
+                        <h4>Order Summary</h4>
+                        <div class="summary-item">
+                            <span>Subtotal</span>
+                            <span>₹${subtotal}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>GST (12%)</span>
+                            <span>₹${gst.toFixed(2)}</span>
+                        </div>
+                        <div class="summary-item total">
+                            <span>Total</span>
+                            <span>₹${total.toFixed(2)}</span>
+                        </div>
+                    </div>
+                    <form id="paymentForm">
+                        <div class="form-group">
+                            <label for="name">Full Name</label>
+                            <input type="text" id="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="address">Address</label>
+                            <textarea id="address" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Payment Method</label>
+                            <div class="payment-methods">
+                                <div class="payment-method" data-method="razorpay">
+                                    <img src="https://razorpay.com/assets/razorpay-glyph.svg" alt="Razorpay">
+                                    <span>Razorpay</span>
+                                </div>
+                                <div class="payment-method" data-method="paytm">
+                                    <img src="https://seeklogo.com/images/P/paytm-logo-5CE78EA427-seeklogo.com.png" alt="Paytm">
+                                    <span>Paytm</span>
+                                </div>
+                                <div class="payment-method" data-method="instamojo">
+                                    <img src="https://www.instamojo.com/blog/wp-content/uploads/2019/11/instamojo-og-1-e1574932322677.png" alt="Instamojo">
+                                    <span>Instamojo</span>
+                                </div>
+                            </div>
+                            <input type="hidden" id="selectedPaymentMethod" name="paymentMethod">
+                        </div>
+                        <button type="submit" class="pay-now-btn">Pay Now</button>
+                    </form>
+                </div>
+            `;
+            
+            document.body.appendChild(checkoutForm);
+            
+            // Add payment method selection
+            const paymentMethods = document.querySelectorAll('.payment-method');
+            paymentMethods.forEach(method => {
+                method.addEventListener('click', function() {
+                    paymentMethods.forEach(m => m.classList.remove('selected'));
+                    this.classList.add('selected');
+                    document.getElementById('selectedPaymentMethod').value = this.getAttribute('data-method');
+                });
+            });
+            
+            // Add form submission
+            const paymentForm = document.getElementById('paymentForm');
+            paymentForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                
+                // Validate payment method
+                const paymentMethod = document.getElementById('selectedPaymentMethod').value;
+                if (!paymentMethod) {
+                    showNotification('Please select a payment method', 'error');
+                    return;
+                }
+                
+                // Show payment processing
+                const checkoutContent = document.querySelector('.checkout-content');
+                checkoutContent.innerHTML = `
+                    <div class="payment-processing">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <h3>Processing Payment</h3>
+                        <p>Please wait while we process your payment...</p>
+                    </div>
+                `;
+                
+                // Simulate payment success after 3 seconds
+                setTimeout(function() {
+                    checkoutContent.innerHTML = `
+                        <div class="payment-processing">
+                            <i class="fas fa-check-circle"></i>
+                            <h3>Payment Successful!</h3>
+                            <p>Your order has been processed successfully.</p>
+                            <button class="pay-now-btn" onclick="closeCheckoutForm()">Done</button>
+                        </div>
+                    `;
+                    
+                    // Clear cart (in a real app)
+                    // cart = [];
+                }, 3000);
+            });
+        }
+
+        function closeCheckoutForm() {
+            const form = document.querySelector('.checkout-form');
+            if (form) {
+                form.remove();
+            }
+        }
+
+        // Add event listener
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkoutBtn = document.getElementById('checkoutBtn');
+            if (checkoutBtn) {
+                checkoutBtn.addEventListener('click', showCheckoutForm);
+            }
+        });
+    </script>
+</body>
+</html> 
